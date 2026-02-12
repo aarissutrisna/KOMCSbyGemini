@@ -14,11 +14,11 @@ export const login = async (req, res) => {
       [username]
     );
 
-    if (rows.length === 0) return sendError(res, 'User not found', 404);
+    if (rows.length === 0) return sendError(res, 'User tidak ditemukan', 404);
     const user = rows[0];
 
     const isMatch = await bcrypt.compare(password, user.password_hash);
-    if (!isMatch) return sendError(res, 'Invalid credentials', 400);
+    if (!isMatch) return sendError(res, 'Kredensial tidak valid', 400);
 
     const token = jwt.sign(
       { id: user.id, role: user.role, branchId: user.branch_id },
@@ -26,13 +26,18 @@ export const login = async (req, res) => {
       { expiresIn: process.env.JWT_EXPIRES_IN || '8h' }
     );
 
-    // Audit Log
+    // Deteksi IP Publik Asli (Support Cloudflare & Proxies)
+    const realIp = req.headers['cf-connecting-ip'] || 
+                   req.headers['x-forwarded-for']?.split(',')[0] || 
+                   req.ip;
+
+    // Audit Log dengan IP Asli
     await db.execute(
-      'INSERT INTO audit_logs (id, user_id, action, details) VALUES (?, ?, ?, ?)',
-      [uuidv4(), user.id, 'LOGIN', JSON.stringify({ ip: req.ip })]
+      'INSERT INTO audit_logs (id, user_id, action, details, ip_address) VALUES (?, ?, ?, ?, ?)',
+      [uuidv4(), user.id, 'LOGIN', JSON.stringify({ user_agent: req.headers['user-agent'] }), realIp]
     );
 
-    return sendSuccess(res, 'Login success', {
+    return sendSuccess(res, 'Login berhasil', {
       token,
       user: { id: user.id, username: user.username, name: user.nama, role: user.role }
     });
