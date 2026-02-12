@@ -1,12 +1,13 @@
 {
   "name": "KomCS PJB",
-  "description": "Production-ready commission management system optimized for 3-hop network (Cloudflare > WGHUB > WGCLIENT). Features proxy-aware accounting, real-ip audit logging, and Ubuntu 24.04/MariaDB 11.4 hardening.",
+  "description": "Production-ready commission management system optimized for 3-hop network. Features localized Tailwind CSS build, proxy-aware accounting, real-ip audit logging, and Ubuntu 24.04/MariaDB 11.4 hardening.",
   "requestFramePermissions": [],
-  "version": "2.2.0",
+  "version": "2.3.0",
   "target_env": {
     "os": "Ubuntu 24.04 LTS",
     "db": "MariaDB 11.4 (LTS)",
     "runtime": "Node.js v20 + HestiaCP",
-    "network": "3-Hop Proxy Aware"
+    "network": "3-Hop Proxy Aware",
+    "frontend_build": "Vite + PostCSS + Tailwind Local"
   }
 }
