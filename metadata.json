@@ -1,13 +1,13 @@
 {
   "name": "KomCS PJB",
-  "description": "Enterprise commission management system. Fixed CSS build conflict for ARM-based VPS and restored Premium UI fidelity.",
+  "description": "Enterprise commission management system. Migrated to Pure Tailwind CDN and Standard CSS to resolve Vite PostCSS build errors on ARM VPS.",
   "requestFramePermissions": [],
-  "version": "2.5.2",
+  "version": "2.5.3",
   "target_env": {
     "os": "Ubuntu 24.04 LTS (ARM)",
     "db": "MariaDB 11.4 (LTS)",
     "runtime": "Node.js v20",
     "network": "3-Hop Proxy Aware",
-    "frontend_build": "Vite 6 (Cleaned Rollup)"
+    "frontend_build": "Vite 6 (CDN Hybrid Mode)"
   }
 }
