@@ -1,17 +1,18 @@
-
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
     "./index.html",
-    "./*.{js,ts,jsx,tsx}",
+    "./index.tsx",
+    "./App.tsx",
     "./components/**/*.{js,ts,jsx,tsx}",
-    "./logic/**/*.{js,ts,jsx,tsx}"
+    "./logic/**/*.{js,ts,jsx,tsx}",
+    "./*.{js,ts,jsx,tsx}"
   ],
   darkMode: 'class',
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+        sans: ['Inter', 'sans-serif'],
         display: ['Poppins', 'sans-serif'],
       },
       colors: {
@@ -34,7 +35,7 @@ export default {
       },
       boxShadow: {
         'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-        'premium': '0 10px 40px -10px rgba(0, 0, 0, 0.1)',
+        'premium': '0 20px 50px -12px rgba(0, 0, 0, 0.15)',
       },
       borderRadius: {
         '3xl': '1.5rem',

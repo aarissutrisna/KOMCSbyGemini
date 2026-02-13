@@ -1,13 +1,13 @@
 {
   "name": "KomCS PJB",
-  "description": "Enterprise-grade commission management system. Optimized for 3-hop proxy environments (Cloudflare -> VPN -> Client). Verified architecture using native ESM and MariaDB 11.4.",
+  "description": "Enterprise commission management system. Fixed CSS build conflict for ARM-based VPS and restored Premium UI fidelity.",
   "requestFramePermissions": [],
-  "version": "2.5.0",
+  "version": "2.5.2",
   "target_env": {
-    "os": "Ubuntu 24.04 LTS",
+    "os": "Ubuntu 24.04 LTS (ARM)",
     "db": "MariaDB 11.4 (LTS)",
-    "runtime": "Node.js v20 + Redis 7",
-    "network": "3-Hop Optimized (Trust Proxy: True)",
-    "frontend_build": "Native Browser ESM + Tailwind CDN"
+    "runtime": "Node.js v20",
+    "network": "3-Hop Proxy Aware",
+    "frontend_build": "Vite 6 (Cleaned Rollup)"
   }
 }
