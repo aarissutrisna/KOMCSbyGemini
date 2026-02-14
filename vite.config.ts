@@ -7,23 +7,22 @@ export default defineConfig({
     outDir: 'dist',
     assetsDir: 'assets',
     minify: 'esbuild',
-    cssCodeSplit: false, 
+    cssCodeSplit: true, 
     sourcemap: false,
-    chunkSizeWarningLimit: 1000, // Menaikkan limit ke 1MB karena dashboard memang berat
+    chunkSizeWarningLimit: 1500,
     rollupOptions: {
       output: {
-        // Memisahkan library pihak ketiga ke chunk vendor agar lebih efisien
+        // Memastikan output JavaScript menggunakan standar ES Modules yang bersih
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            if (id.includes('recharts') || id.includes('d3')) {
-              return 'charts'; // Pisahkan grafik
-            }
-            if (id.includes('react')) {
-              return 'vendor'; // Pisahkan React core
-            }
-            return 'libs'; // Sisanya
+            if (id.includes('recharts') || id.includes('d3')) return 'charts';
+            if (id.includes('react')) return 'vendor';
+            return 'libs';
           }
         },
+        entryFileNames: `assets/[name]-[hash].js`,
+        chunkFileNames: `assets/[name]-[hash].js`,
+        assetFileNames: `assets/[name]-[hash].[ext]`
       },
     },
   },

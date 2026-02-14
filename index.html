@@ -10,80 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
 
-    <!-- Tailwind Play CDN (Hybrid Mode) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            display: ['Poppins', 'sans-serif'],
-          },
-          colors: {
-            primary: {
-              50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 
-              400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 
-              800: '#1e40af', 900: '#1e3a8a', 950: '#172554',
-            }
-          },
-          boxShadow: {
-            'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-            'premium': '0 20px 50px -12px rgba(0, 0, 0, 0.15)',
-          },
-          borderRadius: {
-            '3xl': '1.5rem', '4xl': '2rem', '5xl': '3rem',
-          }
-        }
-      }
-    }
-    </script>
-
-    <!-- Global Styles -->
-    <style>
-      :root { --primary-600: #2563eb; }
-      html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
-      body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; padding: 0; }
-      .dark body { background-color: #020617; color: #f8fafc; }
-      
-      .glass-effect { 
-        background-color: rgba(255, 255, 255, 0.8); 
-        backdrop-filter: blur(12px); 
-        -webkit-backdrop-filter: blur(12px);
-        border-bottom: 1px solid rgba(226, 232, 240, 0.5);
-      }
-      .dark .glass-effect { 
-        background-color: rgba(15, 23, 42, 0.8); 
-        border-bottom: 1px solid rgba(30, 41, 59, 0.5);
-      }
-
-      .card-premium {
-        background-color: white;
-        border-radius: 2rem;
-        border: 1px solid #f1f5f9;
-        box-shadow: 0 2px 15px -3px rgba(0, 0, 0, 0.07);
-        transition: all 0.3s ease;
-      }
-      .dark .card-premium {
-        background-color: #1e293b;
-        border: 1px solid rgba(51, 65, 85, 0.5);
-      }
-
-      .hide-scrollbar::-webkit-scrollbar { display: none; }
-      .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(15px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-      .animate-in { animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
-
-      ::-webkit-scrollbar { width: 6px; }
-      ::-webkit-scrollbar-thumb { background-color: #e2e8f0; border-radius: 9999px; }
-      .dark ::-webkit-scrollbar-thumb { background-color: #1e293b; }
-    </style>
+    <!-- CSS akan di-inject otomatis oleh Vite dari index.css saat build -->
 <script type="importmap">
 {
   "imports": {
@@ -109,6 +36,7 @@
 </head>
 <body>
     <div id="root"></div>
+    <!-- Vite akan mengganti path ini secara otomatis ke file .js yang sudah di-bundle saat npm run build -->
     <script type="module" src="/index.tsx"></script>
 </body>
 </html>
