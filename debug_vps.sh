@@ -1,58 +1,47 @@
 #!/bin/bash
 
-# KomCS PJB - VPS Debugger Script v2
+# KomCS PJB - VPS Debugger Script v3 (Deep Scan)
 echo "------------------------------------------------"
-echo "🔍 DIAGNOSA SISTEM KOMCS PJB (FIX MODE)"
+echo "🔍 DIAGNOSA MENDALAM KOMCS PJB"
 echo "------------------------------------------------"
 
-# 1. Cek Folder Dist
-echo "1. Mengecek folder hasil build (dist)..."
-if [ -d "dist" ]; then
-    echo "✅ Folder dist ditemukan."
-    echo "Isi assets:"
-    ls -F dist/assets/
+# 1. Cek Content-Type via Localhost
+echo "1. Mengecek MIME Type yang dikirim Nginx..."
+JS_FILE=$(ls dist/assets/index.*.js | head -n 1)
+if [ -f "$JS_FILE" ]; then
+    RELATIVE_PATH="assets/$(basename $JS_FILE)"
+    echo "Mengecek file: $RELATIVE_PATH"
+    # Gunakan curl untuk melihat header saja
+    MIME_CHECK=$(curl -I -s http://localhost/$RELATIVE_PATH | grep -i "content-type")
+    echo "Header Content-Type: $MIME_CHECK"
+    
+    if [[ $MIME_CHECK == *"javascript"* ]]; then
+        echo "✅ MIME Type SUDAH BENAR (application/javascript)."
+    else
+        echo "❌ ERROR: MIME Type SALAH! Nginx mengirim: $MIME_CHECK"
+        echo "Solusi: Pastikan 'include /etc/nginx/mime.types;' ada di dalam blok 'location' Nginx."
+    fi
 else
-    echo "❌ Folder dist TIDAK ditemukan! Jalankan 'npm run build' dulu."
+    echo "❌ File JS build tidak ditemukan di dist/assets/."
 fi
 
-# 2. Cek apakah index.html di dist sudah ter-build (bukan source)
-echo -e "\n2. Verifikasi index.html di folder dist..."
+# 2. Cek Keselarasan index.html
+echo -e "\n2. Mengecek index.html di folder dist..."
 if [ -f "dist/index.html" ]; then
-    if grep -q "index.tsx" "dist/index.html"; then
-        echo "❌ ERROR: dist/index.html masih merujuk ke .tsx! Build gagal total."
+    if grep -q "importmap" "dist/index.html"; then
+        echo "⚠️  WARNING: dist/index.html masih mengandung importmap. Ini bisa merusak bundle Vite."
     else
-        echo "✅ index.html sudah ter-bundle (merujuk ke file .js)."
+        echo "✅ index.html bersih dari importmap."
     fi
-else
-    echo "❌ dist/index.html tidak ditemukan."
 fi
 
-# 3. Cek Port Backend (Gunakan ss karena netstat tidak ada)
-echo -e "\n3. Mengecek Port 5000 (Backend)..."
-if command -v ss &> /dev/null; then
-    ss -tulpn | grep :5000 || echo "❌ Backend tidak jalan di port 5000."
-else
-    echo "⚠️  ss tidak ditemukan, tidak bisa cek port."
-fi
-
-# 4. Cek Nginx Config Path
-echo -e "\n4. Verifikasi Root Nginx..."
-CONF="/home/userpusat/conf/web/komc.grosirbaja.com/nginx.conf"
-if [ -f "$CONF" ]; then
-    ROOT_VAL=$(grep "root" "$CONF" | head -n 1)
-    echo "Config Root: $ROOT_VAL"
-    if [[ $ROOT_VAL == *"dist"* ]]; then
-        echo "✅ Root sudah mengarah ke /dist"
-    else
-        echo "❌ ERROR: Root Nginx SALAH! Harus ke /public_html/dist"
-    fi
-else
-    echo "❌ Config HestiaCP tidak ditemukan di $CONF"
-fi
+# 3. Cek Error Log Nginx
+echo -e "\n3. Mengecek 5 baris terakhir error log Nginx..."
+tail -n 5 /var/log/nginx/error.log 2>/dev/null || echo "Tidak bisa mengakses log (butuh sudo)."
 
 echo "------------------------------------------------"
-echo "💡 TINDAKAN:"
-echo "1. Pastikan menjalankan: npm run build"
-echo "2. Edit Nginx config HestiaCP, ubah root ke /dist"
-echo "3. Restart Nginx: systemctl restart nginx"
+echo "💡 LANGKAH TERAKHIR:"
+echo "1. Jalankan ulang: npm run build"
+echo "2. Restart Nginx: sudo systemctl restart nginx"
+echo "3. Jika masih blank, buka Chrome DevTools (F12) > tab 'Console' dan kirimkan errornya."
 echo "------------------------------------------------"
