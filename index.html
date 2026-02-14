@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
 
-    <!-- Tailwind Play CDN -->
+    <!-- Tailwind Play CDN (Hybrid Mode) -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <script>
@@ -41,11 +41,11 @@
     }
     </script>
 
-    <!-- Plain CSS (Build Safe) -->
+    <!-- Global Styles -->
     <style>
       :root { --primary-600: #2563eb; }
       html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
-      body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; }
+      body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; margin: 0; padding: 0; }
       .dark body { background-color: #020617; color: #f8fafc; }
       
       .glass-effect { 
@@ -69,9 +69,6 @@
       .dark .card-premium {
         background-color: #1e293b;
         border: 1px solid rgba(51, 65, 85, 0.5);
-      }
-      .card-premium:hover {
-        box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.15);
       }
 
       .hide-scrollbar::-webkit-scrollbar { display: none; }

@@ -6,13 +6,24 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
-    // Menggunakan esbuild (default) karena terser tidak terinstall di lingkungan VPS
     minify: 'esbuild',
     cssCodeSplit: false, 
     sourcemap: false,
+    chunkSizeWarningLimit: 1000, // Menaikkan limit ke 1MB karena dashboard memang berat
     rollupOptions: {
       output: {
-        manualChunks: undefined,
+        // Memisahkan library pihak ketiga ke chunk vendor agar lebih efisien
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('recharts') || id.includes('d3')) {
+              return 'charts'; // Pisahkan grafik
+            }
+            if (id.includes('react')) {
+              return 'vendor'; // Pisahkan React core
+            }
+            return 'libs'; // Sisanya
+          }
+        },
       },
     },
   },
