@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# KomCS PJB - Ultimate VPS Debugger v17 (Fixed Script Path Edition)
+# KomCS PJB - Ultimate VPS Debugger v18 (Auto-Generation Edition)
 echo "------------------------------------------------"
 echo "🔍 DIAGNOSA & AUTO-FIX KOMCS PJB"
 echo "------------------------------------------------"
@@ -10,7 +10,7 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-# 1. Bersihkan Environment Variable Sistem (Pembersihan pjb_user)
+# 1. Bersihkan Environment Variable Sistem
 echo "1. Purging OS environment variables..."
 unset DB_USER
 unset DB_PASS
@@ -42,35 +42,44 @@ CLIENT_URL=http://komc.grosirbaja.com
 EOF
 chown userpusat:userpusat $ENV_PATH
 
-# 4. Deep Clean PM2
-echo "4. Deep Cleaning PM2..."
-# Hapus semua proses dan file dump yang mungkin menyimpan cache 'pjb_user' atau config rusak
+# 4. Generate Ecosystem Config (Mencegah 'No script path')
+echo "4. Generating ecosystem.config.cjs..."
+ECO_PATH="/home/userpusat/web/komc.grosirbaja.com/public_html/backend/ecosystem.config.cjs"
+cat > $ECO_PATH <<EOF
+module.exports = {
+  apps: [
+    {
+      name: "komcs-pjb-api",
+      script: "./server.js",
+      env_production: {
+        NODE_ENV: "production"
+      }
+    }
+  ]
+};
+EOF
+chown userpusat:userpusat $ECO_PATH
+
+# 5. Deep Clean PM2
+echo "5. Deep Cleaning PM2..."
 sudo -u userpusat pm2 kill
 sudo -u userpusat rm -rf /home/userpusat/.pm2/dump.pm2
 sudo -u userpusat rm -rf /home/userpusat/.pm2/logs/*
 
-# 5. Build Frontend
-echo "5. Rebuilding Frontend..."
+# 6. Build Frontend
+echo "6. Rebuilding Frontend..."
 cd /home/userpusat/web/komc.grosirbaja.com/public_html
 sudo -u userpusat npm run build
 
-# 6. Start Backend
-echo "6. Starting Backend with fixed ecosystem.config.cjs..."
+# 7. Start Backend
+echo "7. Starting Backend..."
 cd /home/userpusat/web/komc.grosirbaja.com/public_html/backend
-
-# Pastikan file ecosystem ada
-if [ ! -f "ecosystem.config.cjs" ]; then
-    echo "❌ Error: ecosystem.config.cjs tidak ditemukan!"
-    exit 1
-fi
-
 sudo -u userpusat npm install
-# Gunakan flag --update-env untuk memastikan variabel .env terbaru dibaca
 sudo -u userpusat pm2 start ecosystem.config.cjs --env production --update-env
 sudo -u userpusat pm2 save
 
-# 7. Final Check
-echo -e "\n7. Verifikasi Status Akhir..."
+# 8. Final Check
+echo -e "\n8. Verifikasi Status Akhir..."
 systemctl restart nginx
 sudo -u userpusat pm2 status
 echo "------------------------------------------------"
