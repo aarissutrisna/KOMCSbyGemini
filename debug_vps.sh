@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# KomCS PJB - Ultimate VPS Debugger v16 (Anti-NoScript Edition)
+# KomCS PJB - Ultimate VPS Debugger v17 (Fixed Script Path Edition)
 echo "------------------------------------------------"
 echo "🔍 DIAGNOSA & AUTO-FIX KOMCS PJB"
 echo "------------------------------------------------"
@@ -11,7 +11,7 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # 1. Bersihkan Environment Variable Sistem (Pembersihan pjb_user)
-echo "1. Purging environment variables..."
+echo "1. Purging OS environment variables..."
 unset DB_USER
 unset DB_PASS
 unset DB_NAME
@@ -57,6 +57,13 @@ sudo -u userpusat npm run build
 # 6. Start Backend
 echo "6. Starting Backend with fixed ecosystem.config.cjs..."
 cd /home/userpusat/web/komc.grosirbaja.com/public_html/backend
+
+# Pastikan file ecosystem ada
+if [ ! -f "ecosystem.config.cjs" ]; then
+    echo "❌ Error: ecosystem.config.cjs tidak ditemukan!"
+    exit 1
+fi
+
 sudo -u userpusat npm install
 # Gunakan flag --update-env untuk memastikan variabel .env terbaru dibaca
 sudo -u userpusat pm2 start ecosystem.config.cjs --env production --update-env
