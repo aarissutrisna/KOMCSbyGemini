@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# KomCS PJB - Ultimate VPS Debugger v18 (Auto-Generation Edition)
+# KomCS PJB - Ultimate VPS Debugger v19 (Redis & Missing Module Fix)
 echo "------------------------------------------------"
-echo "🔍 DIAGNOSA & AUTO-FIX KOMCS PJB"
+echo "🔍 DIAGNOSA & AUTO-FIX KOMCS PJB V19"
 echo "------------------------------------------------"
 
 if [ "$EUID" -ne 0 ]; then
@@ -39,42 +39,30 @@ DB_PORT=3306
 JWT_SECRET=pjb_super_secret_key_2025_secure
 JWT_EXPIRES_IN=12h
 CLIENT_URL=http://komc.grosirbaja.com
+REDIS_URL=redis://localhost:6379
 EOF
 chown userpusat:userpusat $ENV_PATH
 
-# 4. Generate Ecosystem Config (Mencegah 'No script path')
-echo "4. Generating ecosystem.config.cjs..."
-ECO_PATH="/home/userpusat/web/komc.grosirbaja.com/public_html/backend/ecosystem.config.cjs"
-cat > $ECO_PATH <<EOF
-module.exports = {
-  apps: [
-    {
-      name: "komcs-pjb-api",
-      script: "./server.js",
-      env_production: {
-        NODE_ENV: "production"
-      }
-    }
-  ]
-};
-EOF
-chown userpusat:userpusat $ECO_PATH
+# 4. Fix Redis Service
+echo "4. Ensuring Redis Server is active..."
+systemctl enable redis-server
+systemctl restart redis-server
 
-# 5. Deep Clean PM2
-echo "5. Deep Cleaning PM2..."
-sudo -u userpusat pm2 kill
-sudo -u userpusat rm -rf /home/userpusat/.pm2/dump.pm2
-sudo -u userpusat rm -rf /home/userpusat/.pm2/logs/*
-
-# 6. Build Frontend
-echo "6. Rebuilding Frontend..."
+# 5. Build Frontend
+echo "5. Rebuilding Frontend..."
 cd /home/userpusat/web/komc.grosirbaja.com/public_html
+sudo -u userpusat npm install
 sudo -u userpusat npm run build
 
-# 7. Start Backend
-echo "7. Starting Backend..."
+# 6. Deep Clean & Install Backend
+echo "6. Deep Cleaning Backend & Installing Modules..."
 cd /home/userpusat/web/komc.grosirbaja.com/public_html/backend
+sudo -u userpusat rm -rf node_modules package-lock.json
 sudo -u userpusat npm install
+
+# 7. Start Backend with PM2
+echo "7. Resetting PM2 and Starting Process..."
+sudo -u userpusat pm2 kill
 sudo -u userpusat pm2 start ecosystem.config.cjs --env production --update-env
 sudo -u userpusat pm2 save
 
@@ -82,6 +70,7 @@ sudo -u userpusat pm2 save
 echo -e "\n8. Verifikasi Status Akhir..."
 systemctl restart nginx
 sudo -u userpusat pm2 status
+
 echo "------------------------------------------------"
 echo "🎉 PROSES SELESAI"
 echo "Cek logs dengan: sudo -u userpusat pm2 logs komcs-pjb-api"
