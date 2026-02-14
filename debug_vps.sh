@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# KomCS PJB - Ultimate VPS Debugger v11 (Fix PM2 ESM Error)
+# KomCS PJB - Ultimate VPS Debugger v12 (Robust Start)
 echo "------------------------------------------------"
 echo "🔍 DIAGNOSA & AUTO-FIX KOMCS PJB"
 echo "------------------------------------------------"
@@ -16,12 +16,18 @@ systemctl start mariadb
 
 # 2. Reset User & Impor Schema Otomatis
 echo "2. Mereset hak akses & mengimpor skema database..."
-mariadb -u root < /home/userpusat/web/komc.grosirbaja.com/public_html/db_setup.sql
-mysql -u userpusat_komcsuser -p'Ad@rt7754i' userpusat_komcsdb < /home/userpusat/web/komc.grosirbaja.com/public_html/schema.sql
-if [ $? -eq 0 ]; then
-    echo "✅ Database & Schema Berhasil Disiapkan."
+if [ -f "/home/userpusat/web/komc.grosirbaja.com/public_html/db_setup.sql" ]; then
+    mariadb -u root < /home/userpusat/web/komc.grosirbaja.com/public_html/db_setup.sql
 else
-    echo "❌ Gagal Menyiapkan Database. Cek db_setup.sql"
+    echo "⚠️ db_setup.sql tidak ditemukan, mencoba manual..."
+    mariadb -u root -e "CREATE DATABASE IF NOT EXISTS userpusat_komcsdb; GRANT ALL PRIVILEGES ON userpusat_komcsdb.* TO 'userpusat_komcsuser'@'localhost' IDENTIFIED BY 'Ad@rt7754i'; FLUSH PRIVILEGES;"
+fi
+
+if [ -f "/home/userpusat/web/komc.grosirbaja.com/public_html/schema.sql" ]; then
+    mysql -u userpusat_komcsuser -p'Ad@rt7754i' userpusat_komcsdb < /home/userpusat/web/komc.grosirbaja.com/public_html/schema.sql
+    echo "✅ Schema Berhasil Diimpor."
+else
+    echo "❌ schema.sql TIDAK DITEMUKAN!"
 fi
 
 # 3. Bersihkan File Statis & Permissions
@@ -34,20 +40,26 @@ chmod -R 755 /home/userpusat/web/komc.grosirbaja.com/public_html
 echo -e "\n4. Menjalankan build frontend..."
 sudo -u userpusat npm run build
 
-# 5. Hard Restart Backend (Clear PM2 Environment Cache)
+# 5. Hard Restart Backend
 echo -e "\n5. Merestart Backend dengan pembersihan cache..."
-pm2 delete komcs-pjb-api || true
 cd /home/userpusat/web/komc.grosirbaja.com/public_html/backend
-# Menggunakan .cjs untuk menghindari error ES Module scope
-pm2 start ecosystem.config.cjs --update-env
+pm2 delete komcs-pjb-api || true
+
+if [ -f "ecosystem.config.cjs" ]; then
+    pm2 start ecosystem.config.cjs --update-env
+    pm2 save
+    echo "✅ PM2 Started successfully."
+else
+    echo "❌ ecosystem.config.cjs TIDAK DITEMUKAN! Mencoba start langsung..."
+    pm2 start server.js --name komcs-pjb-api --update-env
+fi
+
 systemctl restart nginx
 
-echo -e "\n6. Verifikasi Kredensial di Log PM2..."
-echo "Menampilkan 5 baris terakhir log koneksi database:"
-pm2 logs komcs-pjb-api --lines 5 --no-daemon & sleep 3 && kill $!
-
+echo -e "\n6. Verifikasi Akhir..."
+pm2 status komcs-pjb-api
 echo "------------------------------------------------"
 echo "🎉 PROSES SELESAI"
-echo "Status PM2:"
-pm2 status
+echo "Jika masih ada error 'pjb_user', cek file .env secara manual:"
+echo "cat /home/userpusat/web/komc.grosirbaja.com/public_html/backend/.env"
 echo "------------------------------------------------"
