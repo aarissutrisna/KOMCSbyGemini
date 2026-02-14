@@ -24,7 +24,7 @@ npm install
 # Pastikan .env sudah benar (DB_USER=userpusat_komcsuser, dst)
 sudo npm install -g pm2
 pm2 delete komcs-pjb-api || true
-pm2 start ecosystem.config.js --update-env
+pm2 start ecosystem.config.cjs --update-env
 pm2 save
 ```
 

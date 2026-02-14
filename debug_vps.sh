@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# KomCS PJB - Ultimate VPS Debugger v10 (Hard Reset & Schema Import)
+# KomCS PJB - Ultimate VPS Debugger v11 (Fix PM2 ESM Error)
 echo "------------------------------------------------"
 echo "🔍 DIAGNOSA & AUTO-FIX KOMCS PJB"
 echo "------------------------------------------------"
@@ -36,10 +36,10 @@ sudo -u userpusat npm run build
 
 # 5. Hard Restart Backend (Clear PM2 Environment Cache)
 echo -e "\n5. Merestart Backend dengan pembersihan cache..."
-# Kita hapus dulu prosesnya agar PM2 tidak pakai env lama 'pjb_user'
 pm2 delete komcs-pjb-api || true
 cd /home/userpusat/web/komc.grosirbaja.com/public_html/backend
-pm2 start ecosystem.config.js --update-env
+# Menggunakan .cjs untuk menghindari error ES Module scope
+pm2 start ecosystem.config.cjs --update-env
 systemctl restart nginx
 
 echo -e "\n6. Verifikasi Kredensial di Log PM2..."
@@ -48,7 +48,6 @@ pm2 logs komcs-pjb-api --lines 5 --no-daemon & sleep 3 && kill $!
 
 echo "------------------------------------------------"
 echo "🎉 PROSES SELESAI"
-echo "Jika masih ada error 'pjb_user', pastikan file:"
-echo "/home/userpusat/web/komc.grosirbaja.com/public_html/backend/.env"
-echo "SUDAH berisi DB_USER=userpusat_komcsuser"
+echo "Status PM2:"
+pm2 status
 echo "------------------------------------------------"
