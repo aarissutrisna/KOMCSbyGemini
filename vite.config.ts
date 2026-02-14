@@ -6,13 +6,14 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
+    // Kita matikan ini karena package.json sudah melakukan 'rm -rf dist'
+    emptyOutDir: false, 
     minify: 'esbuild',
     cssCodeSplit: true, 
     sourcemap: false,
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        // Sederhanakan chunking untuk menghindari circular dependency
         manualChunks(id) {
           if (id.includes('node_modules')) {
             if (id.includes('react') || id.includes('scheduler')) {
@@ -24,7 +25,6 @@ export default defineConfig({
             return 'vendor-libs';
           }
         },
-        // Pastikan nama file konsisten
         entryFileNames: 'assets/[name].[hash].js',
         chunkFileNames: 'assets/[name].[hash].js',
         assetFileNames: 'assets/[name].[hash].[ext]'
