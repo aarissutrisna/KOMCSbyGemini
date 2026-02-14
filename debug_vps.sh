@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# KomCS PJB - Ultimate VPS Debugger v7 (DB Aware)
+# KomCS PJB - Ultimate VPS Debugger v8 (Production Credentials)
 echo "------------------------------------------------"
 echo "🔍 DIAGNOSA & AUTO-FIX KOMCS PJB"
 echo "------------------------------------------------"
@@ -17,10 +17,10 @@ if ! systemctl is-active --quiet mariadb; then
     systemctl start mariadb
 fi
 
-# Test pjb_user via CLI
-DB_USER="pjb_user"
-DB_PASS="pjb_password"
-DB_NAME="komcs_pjb"
+# Test userpusat credentials via CLI
+DB_USER="userpusat_komcsuser"
+DB_PASS="Ad@rt7754i"
+DB_NAME="userpusat_komcsdb"
 
 echo "2. Mengetes login MariaDB user '$DB_USER'..."
 mysql -u"$DB_USER" -p"$DB_PASS" -e "status" "$DB_NAME" &>/dev/null
@@ -28,7 +28,7 @@ if [ $? -eq 0 ]; then
     echo "✅ Koneksi Database OK."
 else
     echo "❌ DATABASE ACCESS DENIED!"
-    echo "   Solusi: Jalankan perintah berikut untuk mereset user:"
+    echo "   Solusi: Jalankan perintah berikut untuk mereset user dengan kredensial baru:"
     echo "   sudo mariadb -u root < db_setup.sql"
 fi
 
