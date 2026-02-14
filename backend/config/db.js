@@ -25,7 +25,9 @@ const pool = mysql.createPool({
     console.error(`   - Code: ${error.code}`);
     console.error(`   - Error No: ${error.errno}`);
     console.error(`   - Message: ${error.message}`);
-    console.error('   - Hint: Check if pjb_user exists and has the correct password in .env');
+    console.error(`   - Attempted User: ${process.env.DB_USER}`);
+    console.error(`   - Attempted DB: ${process.env.DB_NAME}`);
+    console.error('   - Hint: Pastikan username dan password di backend/.env sudah benar dan PM2 sudah direstart dengan --update-env');
   }
 })();
 

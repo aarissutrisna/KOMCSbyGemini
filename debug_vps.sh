@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# KomCS PJB - Ultimate VPS Debugger v8 (Production Credentials)
+# KomCS PJB - Ultimate VPS Debugger v10 (Hard Reset & Schema Import)
 echo "------------------------------------------------"
 echo "🔍 DIAGNOSA & AUTO-FIX KOMCS PJB"
 echo "------------------------------------------------"
@@ -10,47 +10,45 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-# 1. Cek Koneksi MariaDB
+# 1. Pastikan MariaDB Berjalan
 echo "1. Mengecek status database..."
-if ! systemctl is-active --quiet mariadb; then
-    echo "❌ MariaDB MATI! Mencoba menyalakan..."
-    systemctl start mariadb
-fi
+systemctl start mariadb
 
-# Test userpusat credentials via CLI
-DB_USER="userpusat_komcsuser"
-DB_PASS="Ad@rt7754i"
-DB_NAME="userpusat_komcsdb"
-
-echo "2. Mengetes login MariaDB user '$DB_USER'..."
-mysql -u"$DB_USER" -p"$DB_PASS" -e "status" "$DB_NAME" &>/dev/null
+# 2. Reset User & Impor Schema Otomatis
+echo "2. Mereset hak akses & mengimpor skema database..."
+mariadb -u root < /home/userpusat/web/komc.grosirbaja.com/public_html/db_setup.sql
+mysql -u userpusat_komcsuser -p'Ad@rt7754i' userpusat_komcsdb < /home/userpusat/web/komc.grosirbaja.com/public_html/schema.sql
 if [ $? -eq 0 ]; then
-    echo "✅ Koneksi Database OK."
+    echo "✅ Database & Schema Berhasil Disiapkan."
 else
-    echo "❌ DATABASE ACCESS DENIED!"
-    echo "   Solusi: Jalankan perintah berikut untuk mereset user dengan kredensial baru:"
-    echo "   sudo mariadb -u root < db_setup.sql"
+    echo "❌ Gagal Menyiapkan Database. Cek db_setup.sql"
 fi
 
+# 3. Bersihkan File Statis & Permissions
 echo -e "\n3. Membersihkan sisa build lama..."
 rm -rf /home/userpusat/web/komc.grosirbaja.com/public_html/dist
 chown -R userpusat:userpusat /home/userpusat/web/komc.grosirbaja.com/public_html
 chmod -R 755 /home/userpusat/web/komc.grosirbaja.com/public_html
 
+# 4. Rebuild Frontend
 echo -e "\n4. Menjalankan build frontend..."
 sudo -u userpusat npm run build
 
-echo -e "\n5. Merestart Backend & Nginx..."
-pm2 restart all || echo "⚠️ PM2 belum jalan, lewati."
+# 5. Hard Restart Backend (Clear PM2 Environment Cache)
+echo -e "\n5. Merestart Backend dengan pembersihan cache..."
+# Kita hapus dulu prosesnya agar PM2 tidak pakai env lama 'pjb_user'
+pm2 delete komcs-pjb-api || true
+cd /home/userpusat/web/komc.grosirbaja.com/public_html/backend
+pm2 start ecosystem.config.js --update-env
 systemctl restart nginx
 
-echo -e "\n6. Validasi Akhir..."
-JS_FILE=$(ls /home/userpusat/web/komc.grosirbaja.com/public_html/dist/assets/index.*.js 2>/dev/null | head -n 1)
-if [ -f "$JS_FILE" ]; then
-    MIME_CHECK=$(curl -I -s http://localhost/assets/$(basename $JS_FILE) | grep -i "content-type")
-    echo "MIME Type JS: $MIME_CHECK"
-fi
+echo -e "\n6. Verifikasi Kredensial di Log PM2..."
+echo "Menampilkan 5 baris terakhir log koneksi database:"
+pm2 logs komcs-pjb-api --lines 5 --no-daemon & sleep 3 && kill $!
+
 echo "------------------------------------------------"
-echo "💡 Jika error DB masih ada, cek log backend:"
-echo "   pm2 logs komcs-pjb-api"
+echo "🎉 PROSES SELESAI"
+echo "Jika masih ada error 'pjb_user', pastikan file:"
+echo "/home/userpusat/web/komc.grosirbaja.com/public_html/backend/.env"
+echo "SUDAH berisi DB_USER=userpusat_komcsuser"
 echo "------------------------------------------------"

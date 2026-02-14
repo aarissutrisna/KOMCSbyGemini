@@ -1,4 +1,3 @@
-
 # 🚀 KomCS PJB Backend Deployment Guide
 
 ## 1. Persiapan Server (Ubuntu 24.04)
@@ -9,41 +8,25 @@ sudo apt install -y nodejs redis-server mariadb-server nginx
 ```
 
 ## 2. Setup Database
-```sql
-CREATE DATABASE komcs_pjb;
-CREATE USER 'pjb_user'@'localhost' IDENTIFIED BY 'PASSWORD_ANDA';
-GRANT ALL PRIVILEGES ON komcs_pjb.* TO 'pjb_user'@'localhost';
-FLUSH PRIVILEGES;
+Jalankan perintah ini di terminal:
+```bash
+# Masuk ke MariaDB root untuk membuat user dan database
+sudo mariadb -u root < /home/userpusat/web/komc.grosirbaja.com/public_html/db_setup.sql
+
+# Impor struktur tabel (Schema)
+mysql -u userpusat_komcsuser -p'Ad@rt7754i' userpusat_komcsdb < /home/userpusat/web/komc.grosirbaja.com/public_html/schema.sql
 ```
-Import `schema.sql` ke database tersebut.
 
 ## 3. Setup Backend
 ```bash
-cd /home/USER/komcs-backend
+cd /home/userpusat/web/komc.grosirbaja.com/public_html/backend
 npm install
-cp .env.example .env # Edit .env
+# Pastikan .env sudah benar (DB_USER=userpusat_komcsuser, dst)
 sudo npm install -g pm2
-pm2 start ecosystem.config.js
+pm2 delete komcs-pjb-api || true
+pm2 start ecosystem.config.js --update-env
 pm2 save
-pm2 startup
 ```
 
 ## 4. Setup Nginx Reverse Proxy
-Edit `/etc/nginx/sites-available/komcs`:
-```nginx
-server {
-    listen 80;
-    server_name api.komcs.pjb.id;
-
-    location / {
-        proxy_pass http://localhost:5000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-    }
-}
-```
-`sudo ln -s /etc/nginx/sites-available/komcs /etc/nginx/sites-enabled/`
-`sudo nginx -t && sudo systemctl restart nginx`
+Pastikan konfigurasi Nginx di HestiaCP sudah mengarah ke port 5000 untuk `/api/`.
