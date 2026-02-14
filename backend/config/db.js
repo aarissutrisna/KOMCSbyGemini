@@ -1,7 +1,12 @@
 import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-dotenv.config();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Load .env secara eksplisit dari root folder backend
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST || '127.0.0.1',
@@ -23,11 +28,9 @@ const pool = mysql.createPool({
   } catch (error) {
     console.error('❌ DB CONNECTION ERROR DETECTED:');
     console.error(`   - Code: ${error.code}`);
-    console.error(`   - Error No: ${error.errno}`);
     console.error(`   - Message: ${error.message}`);
     console.error(`   - Attempted User: ${process.env.DB_USER}`);
-    console.error(`   - Attempted DB: ${process.env.DB_NAME}`);
-    console.error('   - Hint: Pastikan username dan password di backend/.env sudah benar dan PM2 sudah direstart dengan --update-env');
+    console.error(`   - Hint: Jika user di atas bukan 'userpusat_komcsuser', jalankan 'pm2 delete all && ./debug_vps.sh'`);
   }
 })();
 
