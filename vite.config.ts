@@ -9,20 +9,25 @@ export default defineConfig({
     minify: 'esbuild',
     cssCodeSplit: true, 
     sourcemap: false,
-    chunkSizeWarningLimit: 1500,
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        // Memastikan output JavaScript menggunakan standar ES Modules yang bersih
+        // Sederhanakan chunking untuk menghindari circular dependency
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            if (id.includes('recharts') || id.includes('d3')) return 'charts';
-            if (id.includes('react')) return 'vendor';
-            return 'libs';
+            if (id.includes('react') || id.includes('scheduler')) {
+              return 'vendor-core';
+            }
+            if (id.includes('recharts') || id.includes('d3')) {
+              return 'vendor-charts';
+            }
+            return 'vendor-libs';
           }
         },
-        entryFileNames: `assets/[name]-[hash].js`,
-        chunkFileNames: `assets/[name]-[hash].js`,
-        assetFileNames: `assets/[name]-[hash].[ext]`
+        // Pastikan nama file konsisten
+        entryFileNames: 'assets/[name].[hash].js',
+        chunkFileNames: 'assets/[name].[hash].js',
+        assetFileNames: 'assets/[name].[hash].[ext]'
       },
     },
   },
